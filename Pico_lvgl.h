@@ -17,8 +17,8 @@
   */
 
 /* Define to prevent recursive inclusion ------------------------------------*/
-#ifndef __PICO_LVGL_SSD1306_H
-#define __PICO_LVGL_SSD1306_H
+#ifndef __PICO_LVGL_sh1106_H
+#define __PICO_LVGL_sh1106_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,4 +35,4 @@ extern "C" {
 /* Prototypes ---------------------------------------------------------------*/
 uint32_t get_millis_cb(void);
 
-#endif /* __PICO_LVGL_SSD1306_H */
+#endif /* __PICO_LVGL_sh1106_H */

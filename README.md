@@ -1,2 +1,2 @@
-# Pico_lvgl_ssd1306
- Raspberry Pico with LVGL and a SSD1306 monocrome oled display
+# Pico_lvgl_sh1106
+ Raspberry Pico with LVGL and a sh1106 monocrome oled display

@@ -28,40 +28,37 @@ set(PICO_BOARD pico CACHE STRING "Board type")
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
-project(Pico_lvgl_ssd1306 C CXX ASM)
+project(Pico_lvgl_sh1106 C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
-add_executable(Pico_lvgl_ssd1306 Pico_lvgl_ssd1306.c )
+add_executable(Pico_lvgl Pico_lvgl.c )
 
-pico_set_program_name(Pico_lvgl_ssd1306 "Pico_lvgl_ssd1306")
-pico_set_program_version(Pico_lvgl_ssd1306 "0.1")
+pico_set_program_name(Pico_lvgl "Pico_lvgl_sh1106")
+pico_set_program_version(Pico_lvgl "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(Pico_lvgl_ssd1306 0)
-pico_enable_stdio_usb(Pico_lvgl_ssd1306 1)
-
-# Add the standard library to the build
-target_link_libraries(Pico_lvgl_ssd1306
-    pico_stdlib
-)
+pico_enable_stdio_uart(Pico_lvgl 0)
+pico_enable_stdio_usb(Pico_lvgl 1)
 
 add_subdirectory(./lvgl)
-add_subdirectory(./ssd1306)
+add_subdirectory(./sh1106)
 
 # Add the standard include files to the build
-target_include_directories(Pico_lvgl_ssd1306 PRIVATE
+target_include_directories(Pico_lvgl PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}
-    ${CMAKE_CURRENT_LIST_DIR}/ssd1306
+    ${CMAKE_CURRENT_LIST_DIR}/sh1106
     ${CMAKE_CURRENT_LIST_DIR}/lvgl
 )
 
+# Add the standard library to the build
 # Add any user requested libraries
-target_link_libraries(Pico_lvgl_ssd1306
-    ssd1306
+target_link_libraries(Pico_lvgl
+    pico_stdlib
+    sh1106
     lvgl
 )
 
-pico_add_extra_outputs(Pico_lvgl_ssd1306)
+pico_add_extra_outputs(Pico_lvgl)

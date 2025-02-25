@@ -1,20 +1,15 @@
-# # Option to define LV_LVGL_H_INCLUDE_SIMPLE, default: ON
-# option(LV_LVGL_H_INCLUDE_SIMPLE
-#        "Use #include \"lvgl.h\" instead of #include \"../../lvgl.h\"" ON)
+# set(LVGL_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 
-# # Option to define LV_CONF_INCLUDE_SIMPLE, default: ON
-# option(LV_CONF_INCLUDE_SIMPLE
-#        "Use #include \"lv_conf.h\" instead of #include \"../../lv_conf.h\"" ON)
+# Option to define LV_LVGL_H_INCLUDE_SIMPLE, default: ON
+option(LV_LVGL_H_INCLUDE_SIMPLE
+       "Use #include \"lvgl.h\" instead of #include \"../../lvgl.h\"" ON)
 
-add_library(lvgl INTERFACE)
+# Option to define LV_CONF_INCLUDE_SIMPLE, default: ON
+option(LV_CONF_INCLUDE_SIMPLE
+       "Use #include \"lv_conf.h\" instead of #include \"../../lv_conf.h\"" ON)
 
-file(GLOB_RECURSE SOURCES /src/*.c src/*.S) 
+# Set sources used for LVGL components
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_LIST_DIR}/src/*.c ${CMAKE_CURRENT_LIST_DIR}/src/*.S)
 
-target_sources(lvgl INTERFACE
-      ${SOURCES}
-)
-
-target_include_directories(lvgl INTERFACE
-      ${CMAKE_CURRENT_LIST_DIR}
-      ${CMAKE_CURRENT_LIST_DIR}/..
-)
+# Build LVGL library
+add_library(lvgl ${SOURCES})
