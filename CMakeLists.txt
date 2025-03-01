@@ -28,7 +28,7 @@ set(PICO_BOARD pico CACHE STRING "Board type")
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
-project(Pico_lvgl_sh1106 C CXX ASM)
+project(Pico_lvgl C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
@@ -36,7 +36,7 @@ pico_sdk_init()
 # Add executable. Default name is the project name, version 0.1
 add_executable(Pico_lvgl Pico_lvgl.c )
 
-pico_set_program_name(Pico_lvgl "Pico_lvgl_sh1106")
+pico_set_program_name(Pico_lvgl "Pico_lvgl")
 pico_set_program_version(Pico_lvgl "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
@@ -45,11 +45,13 @@ pico_enable_stdio_usb(Pico_lvgl 1)
 
 add_subdirectory(./lvgl)
 add_subdirectory(./sh1106)
+add_subdirectory(./ssd1306)
 
 # Add the standard include files to the build
 target_include_directories(Pico_lvgl PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}
     ${CMAKE_CURRENT_LIST_DIR}/sh1106
+    ${CMAKE_CURRENT_LIST_DIR}/ssd1306
     ${CMAKE_CURRENT_LIST_DIR}/lvgl
 )
 

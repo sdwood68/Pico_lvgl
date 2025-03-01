@@ -150,8 +150,8 @@ int main()
 	printf("LVGL Init\n");
 
 	// Tick Initialization
-	// lv_tick_get_cb_t get_millis_cb = get_millis;
-	// lv_tick_set_cb(get_millis_cb);
+	lv_tick_get_cb_t get_millis_cb = get_millis;
+	lv_tick_set_cb(get_millis_cb);
 
 	// lv_display_t * display = lv_display_create(sh1106_WIDTH, sh1106_HEIGHT);
 	// if (!display) {
