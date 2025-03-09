@@ -1,37 +1,38 @@
 #include "sh1106.h"
+#include <stdlib.h>
 #include <string.h>
-#define sh1106_INVERSE_COLOR
 
-void sh1106_Reset(sh1106_t disp) {
+void sh1106_Reset(sh1106_t *disp) {
 	/* for I2C - do nothing */
 }
 
 // Send a byte to the command register
-void write_1byte_cmd(sh1106_t disp, uint8_t reg) {
+void write_1byte_cmd(sh1106_t *disp, uint8_t reg) {
     printf("cmd(%02X", reg);   // Continuation bit not set, Data bit not set
-    disp.buffer[0] = 0x00;  
-    disp.buffer[1] = reg;
-	i2c_write_blocking(disp.port, disp.addr, disp.buffer, 2, false);
+    disp->cmd_buffer[0] = 0x00;  
+    disp->cmd_buffer[1] = reg;
+	i2c_write_blocking(disp->port, disp->addr, disp->cmd_buffer, 2, false);
     printf(")\n");
 }
 
-void write_2byte_cmd(sh1106_t display, uint8_t reg, uint8_t data) {
+void write_2byte_cmd(sh1106_t *disp, uint8_t reg, uint8_t data) {
     printf("cmd_data(%02X, %02X", reg, data);
     // 0x00 is a byte indicating to sh1106 that a command is being sent
-    display.buffer[0] = 0x80;  // Continuation bit set, Data bit not set
-    display.buffer[1] = reg;
-    display.buffer[2] = 0x00;  // Continuation bit not set, Data bit not set
-    display.buffer[3] = data;
-	i2c_write_blocking(display.port, display.addr, display.buffer, 4, false);
+    disp->cmd_buffer[0] = 0x80;  // Continuation bit set, Data bit not set
+    disp->cmd_buffer[1] = reg;
+    disp->cmd_buffer[2] = 0x00;  // Continuation bit not set, Data bit not set
+    disp->cmd_buffer[3] = data;
+	i2c_write_blocking(disp->port, disp->addr, disp->cmd_buffer, 4, false);
     printf(")\n");
 }
 
 // Send data
-void write_data(sh1106_t disp, uint8_t* buffer, size_t size) {
-    printf("data bytes %d", size);
-    disp.buffer[0] = 0x40;  // Continuation bit not set, Data bit set
-    memcpy(&disp.buffer[1], buffer, size);
-    i2c_write_blocking(disp.port, disp.addr, disp.buffer, size+1, false);
+int write_data(sh1106_t *disp, uint8_t *buffer, size_t size) {
+    printf("data bytes %d\n", size);
+    if (size > sizeof(disp->page_buffer)) return -1;
+    disp->page_buffer[0] = 0x40;  // Continuation bit not set, Data bit set
+    memcpy(&disp->page_buffer[1], buffer, size);
+    i2c_write_blocking(disp->port, disp->addr, disp->page_buffer, size+1, false);
 }
 
 /******************************************************************************
@@ -49,23 +50,21 @@ void write_data(sh1106_t disp, uint8_t* buffer, size_t size) {
  * \param   sh1106_t disp, Display Structure returned by sh1106_init()
  * \param   uint_8t column, starting the column to map to the fisrt  
  */
-void sh1106_col_start(sh1106_t disp, uint8_t column) {
-    if (column > 127) column = 127;
+void sh1106_col_start(sh1106_t *disp, uint8_t column) {
+    column += disp->col_offset;
+    column %= 128;
+    // if (column > 127) column = 127;
     write_1byte_cmd(disp, 0x00 | (column & 0x0F));
     write_1byte_cmd(disp, 0x10 | (column & 0xF0) >> 4);
 }
 
 /**
  * \brief   3. Set Charge Pump voltage value: (30H~33H)
- *          Specifies output voltage (VPP) of the internal charger pump.
- *              0 = 6.4V
- *              1 = 7.4V
- *              2 = 8.0V (POR)
- *              3 = 9.0V
+ *          Specifies output voltage (VPP) of the internal charger pump:
 * \param    sh1106_t disp, Display Structure returned by sh1106_init()
-* \param    uint8_t value  
+* \param    uint8_t value, 0 = 6.4V, 1 = 7.4V, 2 = 8.0V (POR), 3 = 9.0V  
 */
-void ssh1106_chargepump(sh1106_t disp, uint8_t value) {
+void ssh1106_chargepump(sh1106_t *disp, uint8_t value) {
     value = value & 0x03; // Mask the value to the lower two bits
     write_1byte_cmd(disp, 0x30 | value);
 }
@@ -81,7 +80,7 @@ void ssh1106_chargepump(sh1106_t disp, uint8_t value) {
  * \param   sh1106_t disp, Display Structure returned by sh1106_init()
  * \param   uint8_t row
  */
-void sh1106_start_line(sh1106_t disp, uint8_t line) {
+void sh1106_start_line(sh1106_t *disp, uint8_t line) {
     if (line > 63) line = 63;
     write_1byte_cmd(disp, 0x40 | line);
 }
@@ -97,7 +96,7 @@ void sh1106_start_line(sh1106_t disp, uint8_t line) {
  * \param   sh1106_t disp, Display Structure returned by sh1106_init()
  * \param   uint8_t value (0-255), POR = 128
  */
-void sh1106_contrast(sh1106_t disp, uint8_t value) {
+void sh1106_contrast(sh1106_t *disp, uint8_t value) {
     write_2byte_cmd(disp, 0x81, value);
 }
 
@@ -114,9 +113,9 @@ void sh1106_contrast(sh1106_t disp, uint8_t value) {
  * \param   sh1106_t disp, Display Structure returned by sh1106_init()
  * \param   bool mirrored, POR = false
  */
-void ssh1106_reverse_cols(sh1106_t disp, bool mirrored) {
+void sh1106_reverse_cols(sh1106_t *disp, bool mirrored) {
     write_1byte_cmd(disp, mirrored ? 0xA1 : 0xA0);
-    disp.mirrored = mirrored;
+    disp->mirrored = mirrored;
 }
 
 /**
@@ -125,11 +124,13 @@ void ssh1106_reverse_cols(sh1106_t disp, bool mirrored) {
  *          the display data RAM. At this time, the contents of the display 
  *          data RAM are held. This command has priority over the 
  *          normal/reverse display command. 
+ *          normal = true, Display reflects the contents of RAM.
+ *          normal = flase, All display segments are ON.
  * \param   sh1106_t disp, Display Structure returned by sh1106_init()
- * \param   bool norm, POR = false 
+ * \param   bool normal, POR = true 
  */
-void sh1106_norm_display(sh1106_t disp, bool norm) {
-    write_1byte_cmd(disp, norm ? 0xA5 : 0xA4);
+void sh1106_norm_display(sh1106_t *disp, bool normal) {
+    write_1byte_cmd(disp, normal ? 0xA4 : 0xA5);
 }
 
 /**
@@ -142,9 +143,9 @@ void sh1106_norm_display(sh1106_t disp, bool norm) {
  * \param   sh1106_t disp, Display Structure returned by sh1106_init()
  * \param   bool inverted, POR = false
  */
-void sh1106_inverted(sh1106_t disp, bool inverted) {
+void sh1106_inverted(sh1106_t *disp, bool inverted) {
     write_1byte_cmd(disp, inverted ? 0xA6 : 0xA7); //--set inverse color
-    disp.inverted = inverted;
+    disp->inverted = inverted;
 }
 
 /**
@@ -155,7 +156,7 @@ void sh1106_inverted(sh1106_t disp, bool inverted) {
  * \param   sh1106_t disp, Display Structure returned by sh1106_init()
  * \param   uint8_t ratio (1-64), POR = 64
  */
-void sh1106_multiplex(sh1106_t disp, uint8_t ratio) {
+void sh1106_multiplex(sh1106_t *disp, uint8_t ratio) {
     ratio =- 1;
     if (ratio > 63) ratio = 63;
     write_2byte_cmd(disp, 0xA8, ratio); 
@@ -171,7 +172,7 @@ void sh1106_multiplex(sh1106_t disp, uint8_t ratio) {
  * \param   sh1106_t disp, Display Structure returned by sh1106_init()
  * \param   bool On, POR = true
  */
-void sh1106_power(sh1106_t disp, uint8_t on) {
+void sh1106_power_on(sh1106_t *disp, bool on) {
     write_2byte_cmd(disp, 0xAD, on ? 0x8B : 0x8A); 
 }
 
@@ -196,7 +197,7 @@ void sh1106_power(sh1106_t disp, uint8_t on) {
  * \param   sh1106_t disp, Display Structure returned by sh1106_init()
  * \param   bool On, POR = true
  */
-void sh1106_display_on(sh1106_t disp, bool on) {
+void sh1106_display_on(sh1106_t *disp, bool on) {
     write_1byte_cmd(disp, on ? 0xAF : 0xAE);
 }
 
@@ -209,7 +210,7 @@ void sh1106_display_on(sh1106_t disp, bool on) {
  * \param   sh1106_t disp, Display Structure returned by sh1106_init()
  * \param   uint8_t page (0-7)
  */
-void sh1106_page(sh1106_t disp, uint8_t page) {
+void sh1106_page(sh1106_t *disp, uint8_t page) {
     if (page > 7) page = 7;
     write_1byte_cmd(disp, 0xB0 | page);
 }
@@ -226,12 +227,10 @@ void sh1106_page(sh1106_t disp, uint8_t page) {
  * \param   sh1106_t disp, Display Structure returned by sh1106_init()
  * \param   bool flipped, POR = false
  */
-void sh1106_flipped(sh1106_t disp, bool flipped) {
+void sh1106_flipped(sh1106_t *disp, bool flipped) {
     write_1byte_cmd(disp, flipped ? 0xC8 : 0xC0);
-    disp.flipped = flipped;
+    disp->flipped = flipped;
 }
-
-
 
 /**
  * \brief   14. Set Display Offset: (0xD3, Double Bytes Command)
@@ -245,7 +244,7 @@ void sh1106_flipped(sh1106_t disp, bool flipped) {
  * \param   sh1106_t disp, Display Structure returned by sh1106_init()
  * \param   uint8_t offset (0-63), POR = 0
  */
- void sh1106_vert_offset(sh1106_t disp, uint8_t offset) {
+ void sh1106_vert_offset(sh1106_t *disp, uint8_t offset) {
     if (offset > 63) offset = 63;
     write_2byte_cmd(disp, 0xD3, offset);
 }
@@ -262,7 +261,7 @@ void sh1106_flipped(sh1106_t disp, bool flipped) {
  * \param   uint8_t divider (1-16), POR = 1
  * \param   uint8_t freq (0-15), 0 = -25%, 5 = 0% (POR), 15 = +50%
  */
-void sh1106_clk_div(sh1106_t disp, uint8_t divider, uint8_t freq) {
+void sh1106_clk_div(sh1106_t *disp, uint8_t divider, uint8_t freq) {
     divider =- 1;
     if (divider > 15) divider = 0;
     if (freq > 15) freq = 5;
@@ -278,7 +277,7 @@ void sh1106_clk_div(sh1106_t disp, uint8_t divider, uint8_t freq) {
  * \param   uint8_t discharge (1-16), POR = 2
  * \param   uint8_t precharge (1-15), POR = 2
  */
-void sh1106_dis_pre_charge(sh1106_t disp, uint8_t discharge, uint8_t precharge) {
+void sh1106_dis_pre_charge(sh1106_t *disp, uint8_t discharge, uint8_t precharge) {
     if (discharge = 0) discharge = 2;
     if (discharge > 15) discharge = 2;
     if (precharge = 0) precharge = 2;
@@ -295,7 +294,7 @@ void sh1106_dis_pre_charge(sh1106_t disp, uint8_t discharge, uint8_t precharge) 
  * \param   sh1106_t disp, Display Structure returned by sh1106_init()
  * \param   bool sequential, POR = false
  */
-void sh1106_com_pads(sh1106_t disp, bool sequential) {
+void sh1106_com_pads(sh1106_t *disp, bool sequential) {
     write_2byte_cmd(disp, 0xDA, sequential ? 0x02 : 0x12);
 }
 
@@ -311,7 +310,7 @@ void sh1106_com_pads(sh1106_t disp, bool sequential) {
  * \param   sh1106_t disp, Display Structure returned by sh1106_init()
  * \param   uint8_t value, POR = 0x35
  */
-void sh1106_vcomp(sh1106_t disp, uint8_t level) {
+void sh1106_vcomp(sh1106_t *disp, uint8_t level) {
     write_2byte_cmd(disp, 0xDB, level);
 }
 
@@ -338,56 +337,88 @@ void sh1106_vcomp(sh1106_t disp, uint8_t level) {
  *          Non-Operation Command. 
  */
 
-// Write the nbuffer to the display RAM
-void sh1106_UpdateScreen(sh1106_t disp) {
+/**
+ * \brief   Write the buffer to the display RAM
+ * \param   sh1106_t disp, Display Structure returned by sh1106_init()
+ * \param   uint8_t *buffer, pointer to the buffer, buffer must have a size
+ *                           equal to (132 * 8) bytes.
+ */
+int sh1106_flush_buffer(sh1106_t *disp, uint8_t *buffer) {
     for(uint8_t page = 0; page < 8; page++) {
         sh1106_page(disp, page);
-        // write_1byte_cmd(disp, PAGE_START | page);
-        sh1106_col_start(disp, 0);
-        // write_1byte_cmd(disp, LOWCOLUMN);
-        // write_1byte_cmd(disp, HIGHCOLUMN);
-        write_data(disp, &disp.buffer[sh1106_WIDTH * page], PAGE_SIZE);
+        sh1106_col_start(disp, disp->col_offset);
+        write_data(disp, buffer + disp->width * page, disp->width);
     }
+    return 0;
+}
+
+int sh1106_flush_area(sh1106_t *disp, uint8_t x, uint8_t y, uint8_t x_size, uint8_t y_size, uint8_t *buffer) {
+    printf("Flush Area, %d, %d, %d, %d\n", x, y, x_size, y_size);
+	uint8_t row1 = y >> 3;
+	uint8_t row2 = (y + y_size) >> 3;
+    printf("row1 = %d\n", row1);
+    printf("row2 = %d\n", row2);
+	for (uint8_t row = row1; row < row2; row++) {
+		sh1106_page(disp, row);          		// Set the page start address
+		sh1106_col_start(disp, x); 	// Set the lower start column address
+		write_data(disp, buffer, x_size);
+		buffer += x_size;
+    } 
 }
 
 // Fill the whole screen with the given color
-void sh1106_fill_buffer(sh1106_t disp, COLOR_t color) {
-    for(uint32_t i = 0; i < BUF_SIZE; i++) {
-        disp.buffer[i] = (color == Black) ? 0x00 : 0xFF;
+void sh1106_clear_display(sh1106_t *disp) {
+    memset(&disp->page_buffer, 0, sizeof(disp->page_buffer));
+    disp->page_buffer[0] = 0x40;  // Continuation bit not set, Data bit set
+    for(uint8_t page = 0; page < 8; page++) {
+        sh1106_page(disp, page);
+        sh1106_col_start(disp, 0);
+        i2c_write_blocking(disp->port, disp->addr, disp->page_buffer, sizeof(disp->page_buffer), false);  
     }
 }
 
 // Initialize the oled screen
-sh1106_t sh1106_init(i2c_inst_t *port, uint8_t addr, bool inverted, bool flipped, bool mirrored) {
+void sh1106_init(sh1106_t *disp, i2c_inst_t *port, uint8_t addr, uint8_t width, uint8_t height, bool inverted, bool flipped, bool mirrored) {
 
-    sh1106_t disp;
-    disp.port = port; 
-    disp.addr = addr; 
-    disp.inverted = inverted;
-    disp.mirrored = mirrored;  
+    if (width > SH1106_MAX_WIDTH) return;
+    if (height > SH1106_MAX_HEIGHT) return;
 
-	sh1106_Reset(disp);  	// Reset OLED
-    sleep_ms(100);      // Wait for the screen to boot
+    disp->port = port; 
+    disp->addr = addr;
+    disp->col_offset = 2;
+    disp->width = width;
+    disp->height = height; 
+    disp->inverted = inverted;
+    disp->mirrored = mirrored;
+    printf("port = %s\n", port);
+    printf("disp->port = %d\n", disp->port);
+    printf("addr = 0x%02x\n", addr);
+    printf("disp->addr = 0x%02x\n", disp->addr);
+    printf("width = %d\n", width);
+    printf("disp->width = %d\n", disp->width);
+    printf("display height = %d\n", disp->height);
+
+    sh1106_Reset(disp);  	            // Reset OLED
+    sleep_ms(10);                       // Wait for the screen to boot
         
     // Init OLED
-    sh1106_display_on(disp, false); //display off
-    sh1106_page(disp, 0); //Set Page Start Address for Page Addressing Mode,0-7
-    sh1106_col_start(disp, 0); //---set low column address
-    sh1106_start_line(disp, 0);
-    sh1106_contrast(disp, 0x7F);
+    sh1106_display_on(disp, false);     //display off
+    ssh1106_chargepump(disp, 2);        // POR = 2, 8.0V
+    sh1106_power_on(disp, true);        // Turn on the DC-DC converter
+    sh1106_com_pads(disp, false);       // POR = false
+    sh1106_multiplex(disp, 64);         // POR = 64
+    sh1106_norm_display(disp, true);    // POR = true
+    sh1106_clk_div(disp, 1, 5);         // POR = 1, 5
+    sh1106_dis_pre_charge(disp, 2, 2);  // POR is 2, 2
+    sh1106_vcomp(disp, 0x20);           // POR = 0x35
+    sh1106_page(disp, 0);               // POR = 0, page 0
+    sh1106_col_start(disp, 0);          // POR = 0, column 0
+    sh1106_start_line(disp, 0);         // POR = 0, RAM Display line 0
+    sh1106_vert_offset(disp, 0x00);     // POR = 0, offset lines = 0
+    sh1106_contrast(disp, 0x80);        // POR = 128, Half Brightness
     sh1106_flipped(disp, flipped);
+    sh1106_reverse_cols(disp, mirrored);
     sh1106_inverted(disp, inverted);
-    sh1106_multiplex(disp, 0x3F);
-    sh1106_norm_display(disp, true);
-    sh1106_vert_offset(disp, 0x00);
-    sh1106_clk_div(disp, 16, 0);
-    sh1106_dis_pre_charge(disp, 2, 2);
-    sh1106_com_pads(disp, false);
-    sh1106_vcomp(disp, 0x20);  // por = 0x35
-    sh1106_display_on(disp, true); //--turn on sh1106 panel
-
-    sh1106_fill_buffer(disp, Black);        // Clear screen
-    sh1106_UpdateScreen(disp);       // Flush buffer to screen
-  
-    return disp;
+    sh1106_clear_display(disp);
+    sh1106_display_on(disp, true);      // turn on display
 }

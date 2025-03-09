@@ -34,7 +34,7 @@ project(Pico_lvgl C CXX ASM)
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
-add_executable(Pico_lvgl Pico_lvgl.c )
+add_executable(Pico_lvgl Pico_lvgl.c lv_port_disp.c)
 
 pico_set_program_name(Pico_lvgl "Pico_lvgl")
 pico_set_program_version(Pico_lvgl "0.1")

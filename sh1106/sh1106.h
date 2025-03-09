@@ -29,21 +29,16 @@
 #endif
 /* ^^^ I2C config ^^^ */
 
-// sh1106 OLED height in pixels
-#ifndef sh1106_HEIGHT
-#define sh1106_HEIGHT          64
+// sh1106 maximum height in pixels
+#ifndef SH1106_MAX_HEIGHT
+#define SH1106_MAX_HEIGHT          64
 #endif
 
-// sh1106 width in pixels
-#ifndef sh1106_WIDTH
-#define sh1106_WIDTH           132
+// sh1106 maximum width in pixels
+#ifndef SH1106_MAX_WIDTH
+#define SH1106_MAX_WIDTH           132
 #endif
 
-#define PAGE_SIZE               sh1106_WIDTH
-
-#ifndef BUF_SIZE
-#define BUF_SIZE ((sh1106_HEIGHT * sh1106_WIDTH / 8) + 8) // Pad the buffer size by 8 bytes for cammands to be added or LVGLs pix_map
-#endif
 
 
 // Enumeration for screen colors
@@ -56,35 +51,40 @@ typedef enum {
 typedef struct {
     i2c_inst_t *port;
     uint8_t addr; 
+    int8_t col_offset;
+    uint8_t width;
+    uint8_t height;
     bool inverted;
     bool flipped; 
     bool mirrored; 
-    uint8_t buffer[BUF_SIZE];
+    uint8_t page_buffer[SH1106_MAX_WIDTH+1];
+    uint8_t cmd_buffer[4];
 } sh1106_t;
 
-void sh1106_reset(sh1106_t disp);
+void sh1106_reset(sh1106_t *disp);
 
-void sh1106_col_start(sh1106_t disp, uint8_t column);
-void ssh1106_chargepump(sh1106_t disp, uint8_t value);
-void sh1106_start_line(sh1106_t disp, uint8_t row);
-void sh1106_contrast(sh1106_t disp, uint8_t value);
-void ssh1106_reverse_cols(sh1106_t disp, bool mirrored);
-void sh1106_norm_display(sh1106_t disp, bool norm);
-void sh1106_inverted(sh1106_t disp, bool invert);
-void sh1106_multiplex(sh1106_t disp, uint8_t ratio);
-void sh1106_power(sh1106_t disp, uint8_t on);
-void sh1106_display_on(sh1106_t disp, bool on);
-void sh1106_page(sh1106_t disp, uint8_t page);
-void sh1106_flipped(sh1106_t disp, bool flipped);
-void sh1106_vert_offset(sh1106_t disp, uint8_t offset);
-void sh1106_clk_div(sh1106_t disp, uint8_t divider, uint8_t freq);
-void sh1106_dis_pre_charge(sh1106_t disp, uint8_t discharge, uint8_t precharge);
-void sh1106_com_pads(sh1106_t disp, bool sequential);
-void sh1106_vcomp(sh1106_t disp, uint8_t level);
+void sh1106_col_start(sh1106_t *disp, uint8_t column);
+void ssh1106_chargepump(sh1106_t *disp, uint8_t value);
+void sh1106_start_line(sh1106_t *disp, uint8_t row);
+void sh1106_contrast(sh1106_t *disp, uint8_t value);
+void sh1106_reverse_cols(sh1106_t *disp, bool mirrored);
+void sh1106_norm_display(sh1106_t *disp, bool norm);
+void sh1106_inverted(sh1106_t *disp, bool invert);
+void sh1106_multiplex(sh1106_t *disp, uint8_t ratio);
+void sh1106_power_on(sh1106_t *disp, bool on);
+void sh1106_display_on(sh1106_t *disp, bool on);
+void sh1106_page(sh1106_t *disp, uint8_t page);
+void sh1106_flipped(sh1106_t *disp, bool flipped);
+void sh1106_vert_offset(sh1106_t *disp, uint8_t offset);
+void sh1106_clk_div(sh1106_t *disp, uint8_t divider, uint8_t freq);
+void sh1106_dis_pre_charge(sh1106_t *disp, uint8_t discharge, uint8_t precharge);
+void sh1106_com_pads(sh1106_t *disp, bool sequential);
+void sh1106_vcomp(sh1106_t *disp, uint8_t level);
 
-void sh1106_UpdateScreen(sh1106_t disp);
-void sh1106_fill_buffer(sh1106_t disp, COLOR_t color);
+int sh1106_flush_buffer(sh1106_t *disp, uint8_t *buffer);
+int sh1106_flush_area(sh1106_t *disp, uint8_t x, uint8_t y, uint8_t x_size, uint8_t y_size, uint8_t *buffer);
+void sh1106_clear_display(sh1106_t *disp);
 
-sh1106_t sh1106_init(i2c_inst_t *port, uint8_t addr, bool inverted, bool flipped, bool mirrored);
+void sh1106_init(sh1106_t *disp, i2c_inst_t *port, uint8_t addr, uint8_t width, uint8_t height, bool inverted, bool flipped, bool mirrored);
 
 #endif // __sh1106_H__
