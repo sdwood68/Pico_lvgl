@@ -114,6 +114,7 @@ void disp_disable_update(void)
 static void disp_flush(lv_display_t * disp_drv, const lv_area_t * area, uint8_t * px_map)
 {
     if(disp_flush_enabled) {
+        printf("disp_flush()\n");
         /*The most simple case (but also the slowest) to put all pixels to the screen one-by-one*/
 
         // int32_t x;
