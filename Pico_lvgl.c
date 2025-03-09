@@ -116,12 +116,10 @@ int main()
 	 * LVGL Initialization
 	 */
 
+	// Tick Initialization must come first before lv_init()
+	lv_tick_set_cb(my_tick_get_cb);
 	lv_init();
 	lv_port_disp_init();
-
-	// Tick Initialization
-	// lv_tick_get_cb_t get_millis_cb = get_millis;
-	lv_tick_set_cb(my_tick_get_cb);
 
 	printf("Starting Main loop\n");
 	static bool invert = false;

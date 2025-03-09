@@ -116,26 +116,17 @@ static void disp_flush(lv_display_t * disp_drv, const lv_area_t * area, uint8_t 
     if(disp_flush_enabled) {
         /*The most simple case (but also the slowest) to put all pixels to the screen one-by-one*/
 
-        int32_t x;
-        int32_t y;
-        for(y = area->y1; y <= area->y2; y++) {
-            for(x = area->x1; x <= area->x2; x++) {
-                /*Put a pixel to the display. For example:*/
-                /*put_px(x, y, *px_map)*/
-                px_map++;
-            }
-        }
+        // int32_t x;
+        // int32_t y;
+        // for(y = area->y1; y <= area->y2; y++) {
+        //     for(x = area->x1; x <= area->x2; x++) {
+        //         /*Put a pixel to the display. For example:*/
+        //         /*put_px(x, y, *px_map)*/
+        //         px_map++;
+        //     }
+        // }
         
-        
-        // uint8_t x_size = area->x2 - area->x1;
-        // uint8_t y_size = area->y2 - area->y1;
-        // px_map += 8; // To skip the palette, since we are monochrom display
-        // uint8_t *buf = (uint8_t*) px_map;
-
-        // sh1106_flush_buffer(&sh1106, buf);
-
-        /* IMPORTANT!!!
-        * Inform LVGL that you are ready with the flushing and buf is not used anymore*/ 
+        sh1106_flush_buffer(&sh1106, px_map);
     }
 
     /*IMPORTANT!!!
