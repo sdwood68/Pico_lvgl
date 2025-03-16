@@ -8,27 +8,27 @@ void sh1106_Reset(sh1106_t *disp) {
 
 // Send a byte to the command register
 void write_1byte_cmd(sh1106_t *disp, uint8_t reg) {
-    printf("cmd(%02X", reg);   // Continuation bit not set, Data bit not set
+    // printf("cmd(%02X", reg);   // Continuation bit not set, Data bit not set
     disp->cmd_buffer[0] = 0x00;  
     disp->cmd_buffer[1] = reg;
 	i2c_write_blocking(disp->port, disp->addr, disp->cmd_buffer, 2, false);
-    printf(")\n");
+    // printf(")\n");
 }
 
 void write_2byte_cmd(sh1106_t *disp, uint8_t reg, uint8_t data) {
-    printf("cmd_data(%02X, %02X", reg, data);
+    // printf("cmd_data(%02X, %02X", reg, data);
     // 0x00 is a byte indicating to sh1106 that a command is being sent
     disp->cmd_buffer[0] = 0x80;  // Continuation bit set, Data bit not set
     disp->cmd_buffer[1] = reg;
     disp->cmd_buffer[2] = 0x00;  // Continuation bit not set, Data bit not set
     disp->cmd_buffer[3] = data;
 	i2c_write_blocking(disp->port, disp->addr, disp->cmd_buffer, 4, false);
-    printf(")\n");
+    // printf(")\n");
 }
 
 // Send data
 int write_data(sh1106_t *disp, uint8_t *buffer, size_t size) {
-    printf("data bytes %d\n", size);
+    // printf("data bytes %d\n", size);
     if (size > sizeof(disp->page_buffer)) return -1;
     disp->page_buffer[0] = 0x40;  // Continuation bit not set, Data bit set
     memcpy(&disp->page_buffer[1], buffer, size);
@@ -353,11 +353,11 @@ int sh1106_flush_buffer(sh1106_t *disp, uint8_t *buffer) {
 }
 
 int sh1106_flush_area(sh1106_t *disp, uint8_t x, uint8_t y, uint8_t x_size, uint8_t y_size, uint8_t *buffer) {
-    printf("Flush Area, %d, %d, %d, %d\n", x, y, x_size, y_size);
+    // printf("Flush Area, %d, %d, %d, %d\n", x, y, x_size, y_size);
 	uint8_t row1 = y >> 3;
 	uint8_t row2 = (y + y_size) >> 3;
-    printf("row1 = %d\n", row1);
-    printf("row2 = %d\n", row2);
+    // printf("row1 = %d\n", row1);
+    // printf("row2 = %d\n", row2);
 	for (uint8_t row = row1; row < row2; row++) {
 		sh1106_page(disp, row);          		// Set the page start address
 		sh1106_col_start(disp, x); 	// Set the lower start column address
@@ -390,13 +390,13 @@ void sh1106_init(sh1106_t *disp, i2c_inst_t *port, uint8_t addr, uint8_t width, 
     disp->height = height; 
     disp->inverted = inverted;
     disp->mirrored = mirrored;
-    printf("port = %s\n", port);
-    printf("disp->port = %d\n", disp->port);
-    printf("addr = 0x%02x\n", addr);
-    printf("disp->addr = 0x%02x\n", disp->addr);
-    printf("width = %d\n", width);
-    printf("disp->width = %d\n", disp->width);
-    printf("display height = %d\n", disp->height);
+    // printf("port = %s\n", port);
+    // printf("disp->port = %d\n", disp->port);
+    // printf("addr = 0x%02x\n", addr);
+    // printf("disp->addr = 0x%02x\n", disp->addr);
+    // printf("width = %d\n", width);
+    // printf("disp->width = %d\n", disp->width);
+    // printf("display height = %d\n", disp->height);
 
     sh1106_Reset(disp);  	            // Reset OLED
     sleep_ms(10);                       // Wait for the screen to boot

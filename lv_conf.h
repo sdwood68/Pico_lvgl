@@ -133,7 +133,7 @@
  */
 #define LV_DRAW_THREAD_STACK_SIZE    (8 * 1024)   /*[bytes]*/
 
-#define LV_USE_DRAW_SW 0
+#define LV_USE_DRAW_SW 1   /* Needs to be 1 for the handler not to hang */
 #if LV_USE_DRAW_SW == 1
 
 	/*
@@ -143,20 +143,20 @@
 	 * - bitmaps with transparency may use ARGB8888
 	 */
 
-	#define LV_DRAW_SW_SUPPORT_RGB565		1
-	#define LV_DRAW_SW_SUPPORT_RGB565A8		1
-	#define LV_DRAW_SW_SUPPORT_RGB888		1
-	#define LV_DRAW_SW_SUPPORT_XRGB8888		1
-	#define LV_DRAW_SW_SUPPORT_ARGB8888		1
-	#define LV_DRAW_SW_SUPPORT_L8			1
-	#define LV_DRAW_SW_SUPPORT_AL88			1
-	#define LV_DRAW_SW_SUPPORT_A8			1
+	#define LV_DRAW_SW_SUPPORT_RGB565		0
+	#define LV_DRAW_SW_SUPPORT_RGB565A8		0
+	#define LV_DRAW_SW_SUPPORT_RGB888		0
+	#define LV_DRAW_SW_SUPPORT_XRGB8888		0
+	#define LV_DRAW_SW_SUPPORT_ARGB8888		0
+	#define LV_DRAW_SW_SUPPORT_L8			0
+	#define LV_DRAW_SW_SUPPORT_AL88			0
+	#define LV_DRAW_SW_SUPPORT_A8			0
 	#define LV_DRAW_SW_SUPPORT_I1			1
 
 	/* Set the number of draw unit.
      * > 1 requires an operating system enabled in `LV_USE_OS`
      * > 1 means multiple threads will render the screen in parallel */
-    #define LV_DRAW_SW_DRAW_UNIT_CNT    1
+    #define LV_DRAW_SW_DRAW_UNIT_CNT    1       /* Needs to be 1 for the handler not to hang */
 
     /* Use Arm-2D to accelerate the sw render */
     #define LV_USE_DRAW_ARM2D_SYNC      0
@@ -166,7 +166,7 @@
 
     /* 0: use a simple renderer capable of drawing only simple rectangles with gradient, images, texts, and straight lines only
      * 1: use a complex renderer capable of drawing rounded corners, shadow, skew lines, and arcs too */
-    #define LV_DRAW_SW_COMPLEX          1
+    #define LV_DRAW_SW_COMPLEX          0   
 
     #if LV_DRAW_SW_COMPLEX == 1
         /*Allow buffering some shadow calculation.

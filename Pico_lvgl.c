@@ -33,24 +33,20 @@
 #define I2C_SCL 		17
 
 static uint32_t my_tick(void) {
+
 	return to_ms_since_boot(get_absolute_time());
 }
 
-// // lv_tick_get_cb_t get_millis_cb = get_millis;
-// static uint32_t my_tick_get_cb(void) {
-// 	return get_millis();
-// }
-
-void toggle_led(uint32_t timeout) {
+void toggle_led_period(uint32_t timeout) {
 	static uint32_t last_timeout;
 	uint32_t millis = my_tick();
 	if (millis - last_timeout > timeout) {
 		last_timeout += timeout;
-		// printf("[%6d]: ", millis);
-		// printf("Hello, world!\n");
+		// printf("toggle_led [%6d]\n", millis);
 		gpio_put(LED_PIN, !gpio_get(LED_PIN));
 	}
 }
+
 
 int main()
 {
@@ -72,19 +68,19 @@ int main()
 	/*
 	 * LVGL Initialization
 	 */
-	// Tick Initialization must come first before lv_init()
-	lv_tick_set_cb(my_tick);
 	lv_init();
 	lv_port_disp_init();
-
+	lv_tick_set_cb(my_tick);
+	lv_obj_set_style_bg_color(lv_screen_active(), lv_color_white(),LV_PART_MAIN);
 	lv_obj_t *label = lv_label_create(lv_screen_active());
 	lv_label_set_text(label, "Hello World");
 	lv_obj_set_style_text_color(lv_screen_active(), lv_color_black(), LV_PART_MAIN);
 	lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
+	lv_refr_now(NULL);
 
 	printf("Starting Main loop\n");
 	while (true) {
-		toggle_led(1000);
-		lv_timer_handler_run_in_period(10);                     
+		toggle_led_period(500);
+		lv_timer_handler_run_in_period(5);             
     } 
 }
