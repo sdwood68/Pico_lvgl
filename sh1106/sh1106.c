@@ -28,7 +28,7 @@ void write_2byte_cmd(sh1106_t *disp, uint8_t reg, uint8_t data) {
 
 // Send data
 int write_data(sh1106_t *disp, uint8_t *buffer, size_t size) {
-    // printf("data bytes %d\n", size);
+    // printf("Addr: %x, size: %x\n", buffer, size);
     if (size > sizeof(disp->page_buffer)) return -1;
     disp->page_buffer[0] = 0x40;  // Continuation bit not set, Data bit set
     memcpy(&disp->page_buffer[1], buffer, size);
@@ -343,27 +343,34 @@ void sh1106_vcomp(sh1106_t *disp, uint8_t level) {
  * \param   uint8_t *buffer, pointer to the buffer, buffer must have a size
  *                           equal to (132 * 8) bytes.
  */
-int sh1106_flush_buffer(sh1106_t *disp, uint8_t *buffer) {
+int sh1106_write_screen(sh1106_t *disp, uint8_t *buffer) {
     for(uint8_t page = 0; page < 8; page++) {
         sh1106_page(disp, page);
         sh1106_col_start(disp, disp->col_offset);
-        write_data(disp, buffer + disp->width * page, disp->width);
+        write_data(disp, buffer + SH1106_WIDTH * page, SH1106_WIDTH);
     }
     return 0;
 }
 
-int sh1106_flush_area(sh1106_t *disp, uint8_t x, uint8_t y, uint8_t x_size, uint8_t y_size, uint8_t *buffer) {
+int sh1106_write_area(sh1106_t *disp, uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2, uint8_t *buffer) {
     // printf("Flush Area, %d, %d, %d, %d\n", x, y, x_size, y_size);
-	uint8_t row1 = y >> 3;
-	uint8_t row2 = (y + y_size) >> 3;
-    // printf("row1 = %d\n", row1);
-    // printf("row2 = %d\n", row2);
-	for (uint8_t row = row1; row < row2; row++) {
-		sh1106_page(disp, row);          		// Set the page start address
-		sh1106_col_start(disp, x); 	// Set the lower start column address
-		write_data(disp, buffer, x_size);
-		buffer += x_size;
-    } 
+	uint8_t x_1 = x1 & ~(0x07);             // round down by 8 
+    uint8_t x_2 = x2 | (0x07);              // round up by 8
+    uint8_t width = x_2 - x_1 + 1;
+    uint8_t y_1 = y1 & ~(0x7);              // round down by 8 
+    uint8_t y_2 = y2 | (0x07);              // round up by 8
+    uint8_t start_page = y_1 >> 3;
+    uint8_t end_page = y_2 >> 3;
+    printf("X range = %d - %d\n", x_1, x_2);
+    printf("width = %d\n", width);
+    printf("start page = %d\n", start_page);
+    printf("end page = %d\n", end_page);
+	for (uint8_t page = start_page; page <= end_page; page++) {
+		sh1106_page(disp, page);          		// Set the page start address
+		sh1106_col_start(disp, x_1 + disp->col_offset);     // Set the lower start column address
+		write_data(disp, buffer + x_1, width);
+		buffer += SH1106_WIDTH;
+    }
 }
 
 // Fill the whole screen with the given color
@@ -378,25 +385,14 @@ void sh1106_clear_display(sh1106_t *disp) {
 }
 
 // Initialize the oled screen
-void sh1106_init(sh1106_t *disp, i2c_inst_t *port, uint8_t addr, uint8_t width, uint8_t height, bool inverted, bool flipped, bool mirrored) {
-
-    if (width > SH1106_MAX_WIDTH) return;
-    if (height > SH1106_MAX_HEIGHT) return;
+bool sh1106_init(sh1106_t *disp, i2c_inst_t *port, uint8_t addr) {
 
     disp->port = port; 
     disp->addr = addr;
     disp->col_offset = 2;
-    disp->width = width;
-    disp->height = height; 
-    disp->inverted = inverted;
-    disp->mirrored = mirrored;
-    // printf("port = %s\n", port);
-    // printf("disp->port = %d\n", disp->port);
-    // printf("addr = 0x%02x\n", addr);
-    // printf("disp->addr = 0x%02x\n", disp->addr);
-    // printf("width = %d\n", width);
-    // printf("disp->width = %d\n", disp->width);
-    // printf("display height = %d\n", disp->height);
+    disp->inverted = false;
+    disp->mirrored = false;
+    disp->flipped = false;
 
     sh1106_Reset(disp);  	            // Reset OLED
     sleep_ms(10);                       // Wait for the screen to boot
@@ -416,9 +412,11 @@ void sh1106_init(sh1106_t *disp, i2c_inst_t *port, uint8_t addr, uint8_t width, 
     sh1106_start_line(disp, 0);         // POR = 0, RAM Display line 0
     sh1106_vert_offset(disp, 0x00);     // POR = 0, offset lines = 0
     sh1106_contrast(disp, 0x80);        // POR = 128, Half Brightness
-    sh1106_flipped(disp, flipped);
-    sh1106_reverse_cols(disp, mirrored);
-    sh1106_inverted(disp, inverted);
+    sh1106_flipped(disp, disp->flipped);
+    sh1106_reverse_cols(disp, disp->mirrored);
+    sh1106_inverted(disp, disp->inverted);
     sh1106_clear_display(disp);
     sh1106_display_on(disp, true);      // turn on display
+
+    return true;
 }

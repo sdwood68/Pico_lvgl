@@ -30,16 +30,19 @@
 /* ^^^ I2C config ^^^ */
 
 // sh1106 maximum height in pixels
-#ifndef SH1106_MAX_HEIGHT
-#define SH1106_MAX_HEIGHT          64
+#ifndef SH1106_HEIGHT
+#define SH1106_HEIGHT          64
 #endif
 
 // sh1106 maximum width in pixels
-#ifndef SH1106_MAX_WIDTH
-#define SH1106_MAX_WIDTH           132
+#ifndef SH1106_WIDTH
+#define SH1106_WIDTH           128
 #endif
 
-
+// sh1106 maximum width in pixels
+#ifndef SH1106_BUF_SIZE
+#define SH1106_BUF_SIZE           SH1106_HEIGHT * SH1106_WIDTH / 8
+#endif
 
 // Enumeration for screen colors
 typedef enum {
@@ -52,12 +55,10 @@ typedef struct {
     i2c_inst_t *port;
     uint8_t addr; 
     int8_t col_offset;
-    uint8_t width;
-    uint8_t height;
     bool inverted;
     bool flipped; 
     bool mirrored; 
-    uint8_t page_buffer[SH1106_MAX_WIDTH+1];
+    uint8_t page_buffer[SH1106_WIDTH + 1];
     uint8_t cmd_buffer[4];
 } sh1106_t;
 
@@ -81,10 +82,10 @@ void sh1106_dis_pre_charge(sh1106_t *disp, uint8_t discharge, uint8_t precharge)
 void sh1106_com_pads(sh1106_t *disp, bool sequential);
 void sh1106_vcomp(sh1106_t *disp, uint8_t level);
 
-int sh1106_flush_buffer(sh1106_t *disp, uint8_t *buffer);
-int sh1106_flush_area(sh1106_t *disp, uint8_t x, uint8_t y, uint8_t x_size, uint8_t y_size, uint8_t *buffer);
+int sh1106_write_screen(sh1106_t *disp, uint8_t *buffer);
+int sh1106_write_area(sh1106_t *disp, uint8_t x, uint8_t y, uint8_t x_size, uint8_t y_size, uint8_t *buffer);
 void sh1106_clear_display(sh1106_t *disp);
 
-void sh1106_init(sh1106_t *disp, i2c_inst_t *port, uint8_t addr, uint8_t width, uint8_t height, bool inverted, bool flipped, bool mirrored);
-
+// bool sh1106_init(sh1106_t *disp, i2c_inst_t *port, uint8_t addr, uint8_t width, uint8_t height, bool inverted, bool flipped, bool mirrored);
+bool sh1106_init(sh1106_t *disp, i2c_inst_t *port, uint8_t addr);
 #endif // __sh1106_H__
