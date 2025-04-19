@@ -13,7 +13,6 @@
 #include "sh1106.h"
 #include <stdbool.h>
 #include "images/Box.h"
-#include "images/circle_16x16x3.h"
 
 /*********************
  *      DEFINES
@@ -98,10 +97,12 @@ void lv_port_disp_init(void)
 static void disp_init(void)
 {
 	printf("Starting sh1106 Display Init\n");
-	sh1106_init(&sh1106, I2C_PORT, 0x3C);
-    sh1106_flush_buffer(&sh1106, BOX);
+	sh1106_init(&sh1106, I2C_PORT, 0x3C, 128);
+    sh1106_write_screen(&sh1106, BOX);
  	sh1106_inverted(&sh1106, false);
-    sleep_ms(3000);
+    sh1106_flipped(&sh1106, true);
+    sh1106_reverse_cols(&sh1106, true);
+    sleep_ms(5000);
 }
 
 volatile bool disp_flush_enabled = true;

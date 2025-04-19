@@ -22,15 +22,9 @@
 #include "pico/binary_info.h"
 #include "hardware/i2c.h"
 #include "lv_port_disp.h"
-
-/*********************
- *      DEFINES
- *********************/
-#define LED_PIN 		25
-// I2C defines
-#define I2C_PORT 		i2c0
-#define I2C_SDA 		16
-#define I2C_SCL 		17
+#include "lv_port_indev.h"
+#include "Pico_lvgl.h"
+#include "ui.h"
 
 static uint32_t my_tick(void) {
 
@@ -55,8 +49,13 @@ int main()
 	sleep_ms(5000);
 
 	// Default LED
-    gpio_init(LED_PIN);
-	gpio_set_dir(LED_PIN, GPIO_OUT);
+    gpio_init_mask(LED_MASK + KEY_MASK);
+	gpio_set_dir_out_masked(LED_MASK);
+	gpio_pull_up(UP_PIN);
+	gpio_pull_up(DOWN_PIN);
+	gpio_pull_up(LEFT_PIN);
+	gpio_pull_up(RIGHT_PIN);
+	gpio_pull_up(ENT_PIN);
 
 	// I2C Initialisation. Using it at 100Khz.
     i2c_init(I2C_PORT, 400*1000);
@@ -70,13 +69,30 @@ int main()
 	 */
 	lv_init();
 	lv_port_disp_init();
+	lv_port_indev_init();
 	lv_tick_set_cb(my_tick);
-	lv_obj_set_style_bg_color(lv_screen_active(), lv_color_white(),LV_PART_MAIN);
-	lv_obj_t *label = lv_label_create(lv_screen_active());
-	lv_label_set_text(label, "Hello World");
-	lv_obj_set_style_text_color(lv_screen_active(), lv_color_black(), LV_PART_MAIN);
-	lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
-	lv_refr_now(NULL);
+
+	/*
+	 * LVGL
+	 */
+	ui_init();
+	// lv_obj_set_style_bg_color(lv_screen_active(), lv_color_white(),LV_PART_MAIN);
+	// lv_obj_t *label = lv_label_create(lv_screen_active());
+	// lv_label_set_text(label, "Hello World");
+	// lv_obj_set_style_text_color(lv_screen_active(), lv_color_black(), LV_PART_MAIN);
+	// lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
+	// sleep_ms(5000);
+
+	// // Create a label to display key presses
+	// lv_obj_t *label_key = lv_label_create(lv_scr_act());
+	// lv_label_set_text(label_key, "Press a key");
+	// lv_obj_align(label_key, LV_ALIGN_CENTER, 0, 0);
+
+	// // Create a group and add the label to it
+	// lv_group_t * group = lv_group_create();
+	// lv_group_add_obj(group, label_key);
+	// lv_indev_set_group(keypad, group);
+
 
 	printf("Starting Main loop\n");
 	while (true) {

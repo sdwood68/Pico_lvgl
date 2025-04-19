@@ -24,15 +24,45 @@
 extern "C" {
 #endif
 
-/* Includes -----------------------------------------------------------------*/
+/*********************
+ *      INCLUDES
+ *********************/
 #include <stdio.h>
 #include "pico/stdlib.h"
+
+/*********************
+ *      DEFINES
+ *********************/
+#define LED_PIN 		25
+#define LED0 		  	18
+#define LED1 		  	19
+#define LED2 			  20
+#define LED3 			  21
+#define LED_MASK		(1 << LED_PIN | 1 << LED0 | 1 << LED1 | 1 << LED2 | 1 << LED3)
+#define UP_PIN			1
+#define DOWN_PIN		0
+#define LEFT_PIN		2
+#define RIGHT_PIN		3
+#define ENT_PIN			4
+#define KEY_MASK    (1 << UP_PIN | 1 << DOWN_PIN | 1 << LEFT_PIN | 1 << RIGHT_PIN | 1 << ENT_PIN)
+
+// I2C defines
+#define I2C_PORT 		i2c0
+#define I2C_SDA 		16
+#define I2C_SCL 		17
+
+/**********************
+ *      TYPEDEFS
+ **********************/
+
+/**********************
+ * GLOBAL PROTOTYPES
+ **********************/
+
+uint32_t get_millis_cb(void);
 
 #ifdef __cplusplus
 }
 #endif
-
-/* Prototypes ---------------------------------------------------------------*/
-uint32_t get_millis_cb(void);
 
 #endif /* __PICO_LVGL_sh1106_H */
