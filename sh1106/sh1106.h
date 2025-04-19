@@ -39,6 +39,9 @@
 #define SH1106_WIDTH           128
 #endif
 
+#define SSH1106_MAX_WIDTH       132
+#define SSH1106_MAX_HEIGHT      64
+
 // sh1106 maximum width in pixels
 #ifndef SH1106_BUF_SIZE
 #define SH1106_BUF_SIZE           SH1106_HEIGHT * SH1106_WIDTH / 8
@@ -54,7 +57,7 @@ typedef enum {
 typedef struct {
     i2c_inst_t *port;
     uint8_t addr; 
-    int8_t col_offset;
+    uint8_t col_offset;
     bool inverted;
     bool flipped; 
     bool mirrored; 
@@ -87,5 +90,5 @@ int sh1106_write_area(sh1106_t *disp, uint8_t x, uint8_t y, uint8_t x_size, uint
 void sh1106_clear_display(sh1106_t *disp);
 
 // bool sh1106_init(sh1106_t *disp, i2c_inst_t *port, uint8_t addr, uint8_t width, uint8_t height, bool inverted, bool flipped, bool mirrored);
-bool sh1106_init(sh1106_t *disp, i2c_inst_t *port, uint8_t addr);
+bool sh1106_init(sh1106_t *disp, i2c_inst_t *port, uint8_t addr, uint8_t col_offset);
 #endif // __sh1106_H__

@@ -52,7 +52,7 @@ int write_data(sh1106_t *disp, uint8_t *buffer, size_t size) {
  */
 void sh1106_col_start(sh1106_t *disp, uint8_t column) {
     column += disp->col_offset;
-    column %= 128;
+    column %= SSH1106_MAX_WIDTH;
     // if (column > 127) column = 127;
     write_1byte_cmd(disp, 0x00 | (column & 0x0F));
     write_1byte_cmd(disp, 0x10 | (column & 0xF0) >> 4);
@@ -385,11 +385,11 @@ void sh1106_clear_display(sh1106_t *disp) {
 }
 
 // Initialize the oled screen
-bool sh1106_init(sh1106_t *disp, i2c_inst_t *port, uint8_t addr) {
+bool sh1106_init(sh1106_t *disp, i2c_inst_t *port, uint8_t addr, uint8_t col_offset) {
 
     disp->port = port; 
     disp->addr = addr;
-    disp->col_offset = 2;
+    disp->col_offset = col_offset;
     disp->inverted = false;
     disp->mirrored = false;
     disp->flipped = false;
