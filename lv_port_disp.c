@@ -154,9 +154,9 @@ void lv_draw_sw_i1_convert_to_vtiled(const void * buf, uint32_t buf_size, uint32
 static void disp_flush(lv_display_t *disp_drv, const lv_area_t * area, uint8_t *px_map)
 {
     if(disp_flush_enabled) {
-        printf("display flush:\n");
-        printf("X Range: %d-%d\n", area->x1, area->x2);
-        printf("Y Range: %d-%d\n", area->y1, area->y2);
+        // printf("display flush:\n");
+        // printf("X Range: %d-%d\n", area->x1, area->x2);
+        // printf("Y Range: %d-%d\n", area->y1, area->y2);
 
         // Transpose row based data to column 
         px_map += 8; // Skip over the color map.

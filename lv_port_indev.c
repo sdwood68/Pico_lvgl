@@ -102,19 +102,19 @@ static void keypad_read(lv_indev_t *indev_drv, lv_indev_data_t *data)
             // LV_LOG_USER("ENTER KEY");
             break;
         case 2:
-            act_key = LV_KEY_UP;
+            act_key = LV_KEY_PREV;
             // LV_LOG_USER("UP KEY");
             break;
         case 3:
-            act_key = LV_KEY_DOWN;
+            act_key = LV_KEY_NEXT;
             // LV_LOG_USER("DOWN KEY");
             break;
         case 4:
-            act_key = LV_KEY_RIGHT;
+            act_key = LV_KEY_LEFT;
             // LV_LOG_USER("RIGHT KEY");
             break;
         case 5:
-            act_key = LV_KEY_LEFT;
+            act_key = LV_KEY_RIGHT;
             // LV_LOG_USER("LEFT KEY");
             break;
         }

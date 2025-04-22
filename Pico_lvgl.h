@@ -39,11 +39,11 @@ extern "C" {
 #define LED2 			  20
 #define LED3 			  21
 #define LED_MASK		(1 << LED_PIN | 1 << LED0 | 1 << LED1 | 1 << LED2 | 1 << LED3)
+#define ENT_PIN			0
 #define UP_PIN			1
-#define DOWN_PIN		0
-#define LEFT_PIN		2
-#define RIGHT_PIN		3
-#define ENT_PIN			4
+#define DOWN_PIN		2
+#define LEFT_PIN		3
+#define RIGHT_PIN		4
 #define KEY_MASK    (1 << UP_PIN | 1 << DOWN_PIN | 1 << LEFT_PIN | 1 << RIGHT_PIN | 1 << ENT_PIN)
 
 // I2C defines

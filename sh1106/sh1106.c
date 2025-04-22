@@ -361,10 +361,10 @@ int sh1106_write_area(sh1106_t *disp, uint8_t x1, uint8_t x2, uint8_t y1, uint8_
     uint8_t y_2 = y2 | (0x07);              // round up by 8
     uint8_t start_page = y_1 >> 3;
     uint8_t end_page = y_2 >> 3;
-    printf("X range = %d - %d\n", x_1, x_2);
-    printf("width = %d\n", width);
-    printf("start page = %d\n", start_page);
-    printf("end page = %d\n", end_page);
+    // printf("X range = %d - %d\n", x_1, x_2);
+    // printf("width = %d\n", width);
+    // printf("start page = %d\n", start_page);
+    // printf("end page = %d\n", end_page);
 	for (uint8_t page = start_page; page <= end_page; page++) {
 		sh1106_page(disp, page);          		// Set the page start address
 		sh1106_col_start(disp, x_1 + disp->col_offset);     // Set the lower start column address
