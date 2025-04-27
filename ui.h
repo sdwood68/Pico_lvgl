@@ -26,13 +26,18 @@ extern "C" {
 /**********************
  *      TYPEDEFS
  **********************/
+typedef struct {
+    char * name;
+    uint8_t value;
+    uint8_t span;
+    uint8_t min;
+} param_t;
 
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
 
  void ui_init();
-//  void ui_tick();
  
 /**********************
  * GLOBAL Variables
